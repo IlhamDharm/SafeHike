@@ -150,6 +150,45 @@ function getWeatherAdvice(weather: WeatherData['weather']) {
   return tips;
 }
 
+// ─── Mountain image seed map ──────────────────────────────────────────────────
+// Tiap gunung mendapat nomor Picsum Photo berdasarkan nama,
+// sehingga gambarnya konsisten (landscape alam yang indah), selalu tersedia.
+const MOUNTAIN_PICSUM_SEEDS: Record<string, number> = {
+  'prau':       15,   // alpine meadow
+  'rinjani':    29,   // volcanic lake
+  'semeru':     36,   // high volcano
+  'merapi':     45,   // active volcano
+  'merbabu':    52,   // highland grass
+  'bromo':      67,   // volcanic sea of sand
+  'papandayan': 83,   // fumaroles
+  'sindoro':    91,   // twin volcano
+  'sumbing':    102,  // highland
+  'lawu':       117,  // forest
+  'arjuno':     128,  // east java peak
+  'welirang':   134,  // fumaroles
+  'gede':       146,  // west java
+  'pangrango':  152,  // forest
+  'ciremai':    163,  // west java high
+  'slamet':     171,  // central java
+  'ijen':       184,  // crater lake blue fire
+  'batur':      195,  // bali caldera
+  'agung':      207,  // sacred bali
+  'kerinci':    218,  // sumatra
+  'leuser':     223,  // sumatra rainforest
+};
+
+function getMountainImageUrl(mountainName: string, mountainId: number): string {
+  const nameLower = mountainName.toLowerCase();
+  for (const [key, seed] of Object.entries(MOUNTAIN_PICSUM_SEEDS)) {
+    if (nameLower.includes(key)) {
+      return `https://picsum.photos/seed/${seed}/1600/600`;
+    }
+  }
+  // Fallback: seed by mountain ID — always a different but consistent beautiful landscape
+  return `https://picsum.photos/seed/${mountainId + 300}/1600/600`;
+}
+
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function MountainDetail() {
@@ -157,6 +196,7 @@ export default function MountainDetail() {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<TabId>('info');
+  const [imageError, setImageError] = useState(false);
 
   // Core data
   const [mountain, setMountain] = useState<MountainBase | null>(null);
@@ -188,6 +228,7 @@ export default function MountainDetail() {
     async function fetchMountain() {
       setLoading(true);
       setError(null);
+      setImageError(false); // reset image error on mountain change
       try {
         const res = await api.get(`/mountains/${id}`);
         setMountain(res.data);
@@ -313,47 +354,69 @@ export default function MountainDetail() {
         </div>
       </header>
 
-      {/* ── Hero ── */}
-      <div className="relative bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border-b border-slate-800/60 px-4 sm:px-6 py-10">
-        <div className="max-w-7xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-violet-500/15 text-violet-300 border border-violet-500/25 uppercase tracking-wider">
+      {/* ── Hero Banner with Mountain Image ── */}
+      <div className="relative border-b border-slate-800/60 overflow-hidden" style={{ minHeight: '340px' }}>
+        {/* Background Image */}
+        {!imageError ? (
+          <img
+            src={getMountainImageUrl(mountain.name, mountain.id)}
+            alt={mountain.name}
+            onError={() => setImageError(true)}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            style={{ filter: 'brightness(0.35)' }}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-violet-950/30 to-slate-950" />
+        )}
+
+        {/* Multi-layer gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-slate-950/40" />
+
+        {/* Decorative glow orbs */}
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-emerald-600/10 rounded-full blur-2xl pointer-events-none" />
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30 uppercase tracking-wider backdrop-blur-sm">
             <Compass className="h-3.5 w-3.5" /> Eksplorasi Gunung Indonesia
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
             <div className="space-y-3">
-              <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-none">
+              <h1 className="text-5xl sm:text-6xl font-black text-white tracking-tight leading-none drop-shadow-2xl">
                 {mountain.name}
               </h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-slate-300">
-                <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-slate-200">
+                <div className="flex items-center gap-1.5 bg-slate-900/50 backdrop-blur-sm px-3 py-1 rounded-full border border-slate-700/50">
                   <MapPin className="h-4 w-4 text-emerald-400" />
                   <span>{mountain.location}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 bg-slate-900/50 backdrop-blur-sm px-3 py-1 rounded-full border border-slate-700/50">
                   <TrendingUp className="h-4 w-4 text-violet-400" />
                   <span className="font-bold text-white">{mountain.elevation.toLocaleString()} mdpl</span>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold border flex items-center gap-1 ${difficultyColor(mountain.difficulty)}`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1 backdrop-blur-sm ${difficultyColor(mountain.difficulty)}`}>
                   <ShieldAlert className="h-3.5 w-3.5" /> {mountain.difficulty}
                 </span>
               </div>
             </div>
 
             {/* Quick stats bar */}
-            <div className="flex items-center gap-3 sm:gap-5 text-sm">
+            <div className="flex items-center gap-4 sm:gap-6 text-sm bg-slate-900/60 backdrop-blur-md px-5 py-4 rounded-2xl border border-slate-700/50">
               <div className="text-center">
-                <div className="text-xl font-black text-white">{mountain.trails.length}</div>
+                <div className="text-2xl font-black text-white">{mountain.trails.length}</div>
                 <div className="text-xs text-slate-400">Jalur</div>
               </div>
-              <div className="w-px h-8 bg-slate-700" />
+              <div className="w-px h-10 bg-slate-700" />
               <div className="text-center">
-                <div className="text-xl font-black text-white">{mountain.elevation.toLocaleString()}</div>
+                <div className="text-2xl font-black text-white">{mountain.elevation.toLocaleString()}</div>
                 <div className="text-xs text-slate-400">mdpl</div>
               </div>
-              <div className="w-px h-8 bg-slate-700" />
+              <div className="w-px h-10 bg-slate-700" />
               <div className="text-center">
-                <div className="text-xl font-black text-white capitalize">{mountain.difficulty}</div>
+                <div className="text-2xl font-black text-white capitalize">{mountain.difficulty}</div>
                 <div className="text-xs text-slate-400">Tingkat</div>
               </div>
             </div>
