@@ -106,30 +106,30 @@ erDiagram
 
 ```mermaid
 flowchart TD
-    A[Pengguna] --> B{Login / Register}
-    B -->|JWT Token disimpan di localStorage| C[Dashboard Katalog Gunung]
-    B -.->|Tanpa Token: dialihkan ke /login| B
+    A["Pengguna"] --> B{"Login / Register"}
+    B -->|"JWT Token disimpan di localStorage"| C["Dashboard Katalog Gunung"]
+    B -.->|"Tanpa Token: dialihkan ke /login"| B
 
-    C -->|Cari / filter| C1[Pencarian & Filter Wilayah]
-    C -->|Pilih gunung| D[Halaman Detail Gunung]
+    C -->|"Cari / filter"| C1["Pencarian & Filter Wilayah"]
+    C -->|"Pilih gunung"| D["Halaman Detail Gunung"]
 
-    D --> E[Tab: Info Umum]
-    D --> F[Tab: Prakiraan Cuaca]
-    F -->|GET /weather/{id}| F1[Open-Meteo API]
-    F1 --> F2[Saran Keselamatan Otomatis]
+    D --> E["Tab: Info Umum"]
+    D --> F["Tab: Prakiraan Cuaca"]
+    F -->|"GET /weather/{id}"| F1["Open-Meteo API"]
+    F1 --> F2["Saran Keselamatan Otomatis"]
 
-    D --> G[Tab: Jalur Pendakian]
-    G -->|POST /trip-planner/recommendations| G1[Google Gemini AI]
-    G1 --> G2[Rekomendasi Peralatan & Keamanan]
+    D --> G["Tab: Jalur Pendakian"]
+    G -->|"POST /trip-planner/recommendations"| G1["Google Gemini AI"]
+    G1 --> G2["Rekomendasi Peralatan & Keamanan"]
 
-    D --> H[Tab: Statistik]
-    H -->|GET /mountains/{id}/stats| H1[Data Statistik]
+    D --> H["Tab: Statistik"]
+    H -->|"GET /mountains/{id}/stats"| H1["Data Statistik"]
 
-    D --> I[Tab: Peta]
-    I --> I1[Leaflet + OpenStreetMap]
+    D --> I["Tab: Peta"]
+    I --> I1["Leaflet + OpenStreetMap"]
 
-    C & D -->|SQLAlchemy Async| DB[(PostgreSQL / SQLite)]
-    B -->|POST /auth/login| DB
+    C & D -->|"SQLAlchemy Async"| DB[("PostgreSQL / SQLite")]
+    B -->|"POST /auth/login"| DB
 ```
 
 ---
