@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     # DATABASE: Otomatis baca dari .env jika ada, fallback ke SQLite untuk local dev
     DATABASE_URL: str = "sqlite+aiosqlite:///./safehike.db"
     
+    # Konfigurasi CORS: isi dengan daftar origin dipisahkan koma di production
+    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
+
     # Konfigurasi AI
     GEMINI_API_KEY: str | None = None
     GEMINI_MODEL: str = "gemini-3.6-flash"
